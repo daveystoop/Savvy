@@ -1,0 +1,171 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Step Budget</title>
+  <meta name="description" content="A simple, private personal budget tracker. Your data stays in your browser." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css" />
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='8' fill='%231f5c45'/><path d='M8 22h5v-5h5v-5h6' stroke='%23d9f26b' stroke-width='3' fill='none' stroke-linecap='round' stroke-linejoin='round'/></svg>" />
+</head>
+<body>
+  <header class="topbar">
+    <div class="wrap topbar-inner">
+      <a class="brand" href="#">
+        <svg viewBox="0 0 32 32" aria-hidden="true"><rect width="32" height="32" rx="8" /><path d="M8 22h5v-5h5v-5h6" /></svg>
+        Step Budget
+      </a>
+      <nav class="topnav">
+        <a href="#overview">Overview</a>
+        <a href="#budgets">Budgets</a>
+        <a href="#transactions">Transactions</a>
+        <button class="icon-btn" id="themeToggle" title="Toggle theme" aria-label="Toggle theme">◐</button>
+        <button class="icon-btn" id="settingsBtn" title="Settings" aria-label="Settings">⚙</button>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+    <section class="hero">
+      <div class="wrap hero-inner">
+        <div>
+          <p class="eyebrow">Your money, one step at a time</p>
+          <h1>Know where every<br /><em>dollar</em> goes.</h1>
+          <p class="lede">Set a budget for each category, log what you spend, and watch your progress month by month. Everything stays private on this device.</p>
+          <div class="hero-actions">
+            <button class="btn btn-primary" data-open="txDialog">+ Add transaction</button>
+            <button class="btn btn-ghost" data-open="catDialog">New category</button>
+          </div>
+        </div>
+        <div class="month-card">
+          <div class="month-switch">
+            <button class="icon-btn" id="prevMonth" aria-label="Previous month">‹</button>
+            <span id="monthLabel">—</span>
+            <button class="icon-btn" id="nextMonth" aria-label="Next month">›</button>
+          </div>
+          <p class="muted small">Left to spend</p>
+          <p class="big-number" id="leftToSpend">$0</p>
+          <div class="bar"><span id="overallBar"></span></div>
+          <p class="muted small" id="overallCaption">—</p>
+        </div>
+      </div>
+    </section>
+
+    <section id="overview" class="wrap">
+      <div class="stats">
+        <article class="stat"><p class="stat-label">Income</p><p class="stat-value pos" id="statIncome">$0</p></article>
+        <article class="stat"><p class="stat-label">Spent</p><p class="stat-value" id="statSpent">$0</p></article>
+        <article class="stat"><p class="stat-label">Budgeted</p><p class="stat-value" id="statBudget">$0</p></article>
+        <article class="stat accent"><p class="stat-label">Net saved</p><p class="stat-value" id="statNet">$0</p></article>
+      </div>
+
+      <div class="grid-2">
+        <article class="card">
+          <header class="card-head"><h2>Spending by category</h2></header>
+          <div class="donut-wrap">
+            <svg id="donut" viewBox="0 0 200 200" role="img" aria-label="Spending by category"></svg>
+            <ul class="legend" id="legend"></ul>
+          </div>
+        </article>
+        <article class="card">
+          <header class="card-head"><h2>Last 6 months</h2><span class="muted small">Income vs spent</span></header>
+          <div id="trend" class="trend"></div>
+        </article>
+      </div>
+    </section>
+
+    <section id="budgets" class="wrap section">
+      <div class="section-head">
+        <h2 class="section-title">Budgets</h2>
+        <button class="btn btn-ghost" data-open="catDialog">+ Category</button>
+      </div>
+      <div class="budget-grid" id="budgetGrid"></div>
+    </section>
+
+    <section id="transactions" class="wrap section">
+      <div class="section-head">
+        <h2 class="section-title">Transactions</h2>
+        <div class="filters">
+          <input type="search" id="search" placeholder="Search…" />
+          <select id="filterCat"><option value="">All categories</option></select>
+          <button class="btn btn-primary" data-open="txDialog">+ Add</button>
+        </div>
+      </div>
+      <div class="card table-card">
+        <table class="tx-table">
+          <thead><tr><th>Date</th><th>Description</th><th>Category</th><th class="num">Amount</th><th></th></tr></thead>
+          <tbody id="txBody"></tbody>
+        </table>
+        <p class="empty" id="txEmpty">No transactions this month yet. Add your first one ✦</p>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <div class="wrap">Step Budget · Data is saved in this browser only. Export a backup in ⚙ Settings.</div>
+  </footer>
+
+  <!-- Transaction dialog -->
+  <dialog id="txDialog">
+    <form method="dialog" id="txForm">
+      <h3 id="txTitle">Add transaction</h3>
+      <div class="seg">
+        <label><input type="radio" name="type" value="expense" checked /><span>Expense</span></label>
+        <label><input type="radio" name="type" value="income" /><span>Income</span></label>
+      </div>
+      <label>Amount<input name="amount" type="number" step="0.01" min="0.01" required inputmode="decimal" /></label>
+      <label>Description<input name="desc" type="text" maxlength="80" required /></label>
+      <label class="cat-field">Category<select name="categoryId"></select></label>
+      <label>Date<input name="date" type="date" required /></label>
+      <input type="hidden" name="id" />
+      <div class="dialog-actions">
+        <button type="button" class="btn btn-ghost" data-close>Cancel</button>
+        <button type="submit" class="btn btn-primary">Save</button>
+      </div>
+    </form>
+  </dialog>
+
+  <!-- Category dialog -->
+  <dialog id="catDialog">
+    <form method="dialog" id="catForm">
+      <h3 id="catTitle">New category</h3>
+      <label>Name<input name="name" type="text" maxlength="30" required /></label>
+      <label>Monthly budget<input name="budget" type="number" step="1" min="0" required inputmode="decimal" /></label>
+      <label>Colour<input name="color" type="color" value="#1f5c45" /></label>
+      <input type="hidden" name="id" />
+      <div class="dialog-actions">
+        <button type="button" class="btn btn-danger" id="deleteCat" hidden>Delete</button>
+        <span class="spacer"></span>
+        <button type="button" class="btn btn-ghost" data-close>Cancel</button>
+        <button type="submit" class="btn btn-primary">Save</button>
+      </div>
+    </form>
+  </dialog>
+
+  <!-- Settings dialog -->
+  <dialog id="settingsDialog">
+    <form method="dialog" id="settingsForm">
+      <h3>Settings</h3>
+      <label>Currency
+        <select name="currency">
+          <option>AUD</option><option>USD</option><option>EUR</option><option>GBP</option><option>NZD</option><option>CAD</option>
+        </select>
+      </label>
+      <div class="settings-actions">
+        <button type="button" class="btn btn-ghost" id="exportJson">Export backup (JSON)</button>
+        <button type="button" class="btn btn-ghost" id="exportCsv">Export transactions (CSV)</button>
+        <label class="btn btn-ghost file-btn">Import backup<input type="file" id="importJson" accept="application/json" hidden /></label>
+        <button type="button" class="btn btn-danger" id="resetAll">Reset all data</button>
+      </div>
+      <div class="dialog-actions">
+        <button type="submit" class="btn btn-primary">Done</button>
+      </div>
+    </form>
+  </dialog>
+
+  <script src="app.js"></script>
+</body>
+</html>
